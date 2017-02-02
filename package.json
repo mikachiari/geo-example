@@ -2,9 +2,12 @@
   "name": "simple-example",
   "version": "0.0.1",
   "description": "Simple example how to work with spatial extensions in different DB types",
-  "main": "index.js",
+  "main": "server/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon -w server --exec \"babel-node server --presets es2015,stage-0\"",
+    "build": "babel server -s -D -d dist --presets es2015,stage-0",
+    "start": "node dist",
+    "prestart": "npm run -s build"
   },
   "keywords": [
     "geo",
@@ -14,5 +17,11 @@
     "db"
   ],
   "author": "Danil Vlasov",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.22.2"
+  }
 }
