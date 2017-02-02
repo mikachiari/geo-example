@@ -26,7 +26,5 @@ module.exports = function(sequelize, DataTypes) {
 
     return sequelize.query(QUERY, { type: sequelize.QueryTypes.SELECT });
   }
-
-  console.log("UsState =========================================================");
-  return UsState;
+   return UsState;
 };

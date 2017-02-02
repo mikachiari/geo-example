@@ -1,5 +1,6 @@
 import Express from 'express';
 import Sequelize from 'sequelize';
+import cors from 'cors';
 
 const app = Express();
 
@@ -17,9 +18,11 @@ const prepareModel = (db, model) => {
 
 const UsState = prepareModel(mysqlConn, './models/us_state');
 
-app.get('/mysql-connection', (req, res) => {
-  res.send(mysqlConnectionStatus);
-});
+app
+  .use(cors())
+  .get('/mysql-connection', (req, res) => {
+    res.send(mysqlConnectionStatus);
+  });
 
 app.get('/mysql/get-area/', (req, res) => {
   const {
@@ -33,7 +36,9 @@ app.get('/mysql/get-area/', (req, res) => {
 
   UsState.getStateByCoords(lat, lng)
     .then((rs) => {
-      res.send({state: rs[0]})
+      res.send({
+        state: rs[0]
+      })
     })
     .catch((err) => {
       console.log(err)

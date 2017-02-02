@@ -14,10 +14,17 @@
         height: 80%;
         width: 80%;
       }
+      .description {
+        width: 100%;
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
+    <div class="description">
+      <p>State: <span id="state_name"></span></p>
+      <p>coordinates: <span id="coorninates"></span></p>
+    </div>
     <script>
       let map, marker;
       function initMap() {
@@ -28,7 +35,8 @@
         });
 
         map.addListener('click', (e) => {
-          console.log(e);
+          getState(e.latLng);
+
           if(marker) marker.setMap(null);
           marker = new google.maps.Marker({
             position: e.latLng,
@@ -36,7 +44,21 @@
           });
         })
       }
+
+      function getState(latLng) {
+        $('#coorninates').html(`lat: ${latLng.lat()}, lng: ${latLng.lng()}`)
+
+        $.ajax(`http://geodata.local:3000/mysql/get-area?lat=${latLng.lat()}&lng=${latLng.lng()}`, {
+          error: (err) => console.log("Error:", err),
+          success: (data) => {
+            console.log(data.state)
+            const state = (data.state)? data.state : { name: 'Not Found' };
+            $('#state_name').html(state.name)
+          }
+        })
+      }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBKoWU2fu2elYMJiDXFYxY_Wg5FdviVIE&callback=initMap" async defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   </body>
 </html>
