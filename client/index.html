@@ -42,6 +42,7 @@
       }
       .stress-container {
         display: flex;
+        align-items: center;
       }
       .stress-button {
         width: 40px;
@@ -91,6 +92,7 @@
         <div class="specific-data">
           <p class="field-desc">JSON</p>
           <div class="stress-container">
+            <div class="point ready" id="point_json"></div>
             <div><span class="number-of-points"></span> points</div>
             <div class="stress-button button" onclick="goStress('json')">GO</div>
             <div id="time_stress_json"></div>
@@ -102,6 +104,7 @@
         <div class="specific-data">
           <p class="field-desc">NO INDEX</p>
           <div class="stress-container">
+            <div class="point ready" id="point_no_index"></div>
             <div><span class="number-of-points"></span> points</div>
             <div class="stress-button button" onclick="goStress('no_index')">GO</div>
             <div id="time_stress_no_index"></div>
@@ -113,6 +116,7 @@
         <div class="specific-data">
           <p class="field-desc">WITH INDEX</p>
           <div class="stress-container">
+            <div class="point ready" id="point_index"></div>
             <div><span class="number-of-points"></span> points</div>
             <div class="stress-button button" onclick="goStress('index')">GO</div>
             <div id="time_stress_index"></div>
@@ -186,12 +190,13 @@
         const start_time = new Date();
         let cnt = 0;
         const el = $(`#time_stress_${method}`);
+        $(`#point_${method}`).css('background-color', 'red')
         const cb = () => {
           cnt += 1;
-          el.html(cnt)
           if(cnt === +$("#count").val() ) {
             const end_time = new Date();
             el.html(`${end_time.getTime() - start_time.getTime()} ms`)
+            $(`#point_${method}`).css('background-color', 'green')
           }
         }
 
@@ -203,8 +208,7 @@
       function randomFromInterval(min,max) { return Math.random()*(max-min+1)+min; }
       // generate a bunch of random coordinates
       function genCoords() {
-        $('#ready').removeClass('ready')
-        $('#ready').addClass('not-ready')
+        $('#ready').css('background-color', 'red')
         setTimeout(() => {
           count = +$("#count").val() || COORDINATE_COUNT
           coordinates = (new Array(count)).fill(0).map(() => {
@@ -216,8 +220,7 @@
             }
           })
           $('.number-of-points').html(count)
-          $('#ready').removeClass('not-ready')
-          $('#ready').addClass('ready')
+          $('#ready').css('background-color', 'green')
         }, 0)
       }
 
