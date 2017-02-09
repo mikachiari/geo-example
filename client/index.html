@@ -17,31 +17,57 @@
         flex-direction: row;
       }
       #controllers {
-        flex: 2;
         padding: 5px;
       }
       #map {
         margin: 5px;
-        height: 100%;
-        width: 100%;
         flex: 5
       }
       .description {
+        flex: 2;
         padding: 5px;
-        width: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .field-desc {
+        font-size: 0.9em;
+        color: gray;
+      }
+      .specific-data > p {
+        margin-top: 0px;
+        margin-bottom: 10px;
+      }
+      .specific-data {
+        padding-bottom: 10px;
       }
     </style>
   </head>
   <body>
     <div id="map-container">
       <div id="map"></div>
-      <div id="controllers">
-        something here
+      <div class="description">
+        <div class="specific-data">
+          <p class="field-desc">JSON</p>
+          <p>Time: <span id="time_json"></span> ms</p>
+          <p>State: <span id="state_name_json"></span></p>
+          <p>coordinates: <span id="coorninates_json"></span></p>
+        </div>
+        <div class="specific-data">
+          <p class="field-desc">NO INDEX</p>
+          <p>Time: <span id="time_no_index"></span> ms</p>
+          <p>State: <span id="state_name_no_index"></span></p>
+          <p>coordinates: <span id="coorninates_no_index"></span></p>
+        </div>
+        <div class="specific-data">
+          <p class="field-desc">WITH INDEX</p>
+          <p>Time: <span id="time_index"></span> ms</p>
+          <p>State: <span id="state_name_index"></span></p>
+          <p>coordinates: <span id="coorninates_index"></span></p>
+        </div>
       </div>
     </div>
-    <div class="description">
-      <p>State: <span id="state_name"></span></p>
-      <p>coordinates: <span id="coorninates"></span></p>
+    <div id="controllers">
+      something here
     </div>
     <script>
       let map, marker;
@@ -53,7 +79,9 @@
         });
 
         map.addListener('click', (e) => {
-          getState(e.latLng);
+          getState(e.latLng, 'json');
+          getState(e.latLng, 'index');
+          getState(e.latLng, 'no_index');
 
           if(marker) marker.setMap(null);
           marker = new google.maps.Marker({
@@ -63,14 +91,17 @@
         })
       }
 
-      function getState(latLng) {
-        $.ajax(`http://geodata.local:3000/mysql/get-area?lat=${latLng.lat()}&lng=${latLng.lng()}`, {
+      function getState(latLng, method="") {
+        const start_time = new Date();
+        $.ajax(`http://geodata.local:3000/mysql/get-area?lat=${latLng.lat()}&lng=${latLng.lng()}&method=${method}`, {
           error: (err) => console.log("Error:", err),
           success: (data) => {
+            const end_time = new Date();
             console.log(data.state)
             const state = (data.state)? data.state : { name: 'Not Found' };
-            $('#state_name').html(state.name)
-            $('#coorninates').html(`lat: ${latLng.lat()}, lng: ${latLng.lng()}`)
+            $(`#state_name_${method}`).html(state.name)
+            $(`#coorninates_${method}`).html(`lat: ${latLng.lat()}, lng: ${latLng.lng()}`)
+            $(`#time_${method}`).html(`${end_time.getTime() - start_time.getTime()}`)
           }
         })
       }
