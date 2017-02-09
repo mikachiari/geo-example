@@ -10,17 +10,35 @@
         margin: 0;
         padding: 0;
       }
-      #map {
+      #map-container {
+        width: 100%;
         height: 80%;
-        width: 80%;
+        display: flex;
+        flex-direction: row;
+      }
+      #controllers {
+        flex: 2;
+        padding: 5px;
+      }
+      #map {
+        margin: 5px;
+        height: 100%;
+        width: 100%;
+        flex: 5
       }
       .description {
+        padding: 5px;
         width: 100%;
       }
     </style>
   </head>
   <body>
-    <div id="map"></div>
+    <div id="map-container">
+      <div id="map"></div>
+      <div id="controllers">
+        something here
+      </div>
+    </div>
     <div class="description">
       <p>State: <span id="state_name"></span></p>
       <p>coordinates: <span id="coorninates"></span></p>
@@ -46,14 +64,13 @@
       }
 
       function getState(latLng) {
-        $('#coorninates').html(`lat: ${latLng.lat()}, lng: ${latLng.lng()}`)
-
         $.ajax(`http://geodata.local:3000/mysql/get-area?lat=${latLng.lat()}&lng=${latLng.lng()}`, {
           error: (err) => console.log("Error:", err),
           success: (data) => {
             console.log(data.state)
             const state = (data.state)? data.state : { name: 'Not Found' };
             $('#state_name').html(state.name)
+            $('#coorninates').html(`lat: ${latLng.lat()}, lng: ${latLng.lng()}`)
           }
         })
       }

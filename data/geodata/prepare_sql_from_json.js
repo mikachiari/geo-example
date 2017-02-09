@@ -13,7 +13,7 @@ fs.readFile('./gz_2010_us_040_00_20m_low.json', 'utf8', function(err, data) {
         }
       })
       .map((item) => {
-        return `INSERT INTO us_state (name, state, geometry) VALUES ('${item.name}', '${item.state}', '${JSON.stringify(item.geometry)}');`
+        return `INSERT INTO us_state (name, state, geo_json) VALUES ('${item.name}', '${item.state}', '${JSON.stringify(item.geometry)}');`
       })
       .reduce((prev, next) => prev + next + '\n', "");
     console.log(prepared);

@@ -27,14 +27,29 @@ app
 app.get('/mysql/get-area/', (req, res) => {
   const {
     lat,
-    lng
+    lng,
+    method
   } = req.query;
   if (!lat || !lng) {
     res.status(400).send(`No coords set<br>lat=${lat} | lng=${lng}`);
     return;
   }
 
-  UsState.getStateByCoords(lat, lng)
+  let func;
+  switch (method) {
+    case "index":
+      func = UsState.getStateCoordsIndex;
+      break;
+
+    case "no_index":
+      func = UsState.getStateCoordsNoIndex;
+      break;
+
+    default:
+      func = UsState.getStateByCoords;
+  }
+
+  func(lat, lng)
     .then((rs) => {
       res.send({
         state: rs[0]
@@ -49,6 +64,6 @@ app.get('/mysql/get-area/', (req, res) => {
     })
 })
 
-app.listen(3000, function() {
+app.listen(3000, function () {
   console.log('Example app listening on port 3000!');
 });
