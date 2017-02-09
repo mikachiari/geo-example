@@ -21,4 +21,11 @@ ALTER TABLE us_state ADD SPATIAL INDEX(geo_binary);
 -- try the same without index
 ALTER TABLE us_state ADD COLUMN geo_no_index GEOMETRY;
 UPDATE us_state SET geo_no_index=geo_binary;
+
+-- another table for storing points
+CREATE TABLE geo_points (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  lat FLOAT NOT NULL,
+  lng FLOAT NOT NULL
+  );
 ```

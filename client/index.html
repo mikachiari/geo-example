@@ -40,37 +40,103 @@
       .specific-data {
         padding-bottom: 10px;
       }
+      .stress-container {
+        display: flex;
+      }
+      .stress-button {
+        width: 40px;
+      }
+      .stress-container > div {
+        margin-right: 5px;
+      }
+      #regen-container {
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 20px;
+        align-items: center;
+      }
+      #regen-container > #count { width: 50px; }
+      #regen-container > label, #regen-container > input, #regen-container > div { margin-right: 5px; }
+      #regenerate {
+      }
+      .button {
+        background-color: #ccc;
+        border-radius: 3px;
+        padding: 0 10px;
+        cursor: pointer;
+        text-align: center;
+      }
+      .button:hover {
+        background-color: #aaa;
+      }
+      .point {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .point.ready { background-color: green; }
+      .point.not-ready { background-color: red; }
     </style>
   </head>
   <body>
     <div id="map-container">
       <div id="map"></div>
       <div class="description">
+        <div id="regen-container">
+          <label for="count">Points:</label>
+          <input name="count" id="count" type="number"></input>
+          <div id="regenerate" class="button" onclick="genCoords()">Regenerate</div>
+          <div id="ready" class="point"></div>
+        </div>
         <div class="specific-data">
           <p class="field-desc">JSON</p>
-          <p>Time: <span id="time_json"></span> ms</p>
+          <div class="stress-container">
+            <div><span class="number-of-points"></span> points</div>
+            <div class="stress-button button" onclick="goStress('json')">GO</div>
+            <div id="time_stress_json"></div>
+          </div>
+          <p>Time: <span id="time_json"></span></p>
           <p>State: <span id="state_name_json"></span></p>
           <p>coordinates: <span id="coorninates_json"></span></p>
         </div>
         <div class="specific-data">
           <p class="field-desc">NO INDEX</p>
-          <p>Time: <span id="time_no_index"></span> ms</p>
+          <div class="stress-container">
+            <div><span class="number-of-points"></span> points</div>
+            <div class="stress-button button" onclick="goStress('no_index')">GO</div>
+            <div id="time_stress_no_index"></div>
+          </div>
+          <p>Time: <span id="time_no_index"></span></p>
           <p>State: <span id="state_name_no_index"></span></p>
           <p>coordinates: <span id="coorninates_no_index"></span></p>
         </div>
         <div class="specific-data">
           <p class="field-desc">WITH INDEX</p>
-          <p>Time: <span id="time_index"></span> ms</p>
+          <div class="stress-container">
+            <div><span class="number-of-points"></span> points</div>
+            <div class="stress-button button" onclick="goStress('index')">GO</div>
+            <div id="time_stress_index"></div>
+          </div>
+          <p>Time: <span id="time_index"></span></p>
           <p>State: <span id="state_name_index"></span></p>
           <p>coordinates: <span id="coorninates_index"></span></p>
         </div>
       </div>
     </div>
     <div id="controllers">
-      something here
+      <pre>
+  USA Borders Box
+  left (Alaska islands): lat: 52.96187505907603, lng: -179.001953125
+  top (Alaska): lat: 71.42717893107371, lng: -156.59912109375
+  left point: lat: 40.44694705960048, lng: -124.453125
+  right point: lat: 44.33956524809714, lng: -66.708984375
+  top point: lat: 49.61070993807422, lng: -95.9765625
+  bottom point: lat: 24.502144901210876, lng: -81.826171875
+      </pre>
     </div>
     <script>
-      let map, marker;
+      const COORDINATE_COUNT = 500;
+      let map, marker, coordinates = [];
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 38.8258892, lng: -100.4641897},
@@ -91,20 +157,77 @@
         })
       }
 
-      function getState(latLng, method="") {
-        const start_time = new Date();
+
+      function sendSingleRequest(latLng, method, cb = null) {
         $.ajax(`http://geodata.local:3000/mysql/get-area?lat=${latLng.lat()}&lng=${latLng.lng()}&method=${method}`, {
-          error: (err) => console.log("Error:", err),
+          error: () => {
+            if(cb) cb();
+          },
           success: (data) => {
-            const end_time = new Date();
-            console.log(data.state)
-            const state = (data.state)? data.state : { name: 'Not Found' };
-            $(`#state_name_${method}`).html(state.name)
-            $(`#coorninates_${method}`).html(`lat: ${latLng.lat()}, lng: ${latLng.lng()}`)
-            $(`#time_${method}`).html(`${end_time.getTime() - start_time.getTime()}`)
+            if(cb) cb(data);
           }
         })
       }
+
+      function getState(latLng, method="") {
+        const cb = (data) => {
+          const end_time = new Date();
+          console.log(data.state)
+          const state = (data.state)? data.state : { name: 'Not Found' };
+          $(`#state_name_${method}`).html(state.name)
+          $(`#coorninates_${method}`).html(`lat: ${latLng.lat()}, lng: ${latLng.lng()}`)
+          $(`#time_${method}`).html(`${end_time.getTime() - start_time.getTime()} ms`)
+        }
+        const start_time = new Date();
+        sendSingleRequest(latLng, method, cb)
+      }
+
+      function goStress(method="json") {
+        const start_time = new Date();
+        let cnt = 0;
+        const el = $(`#time_stress_${method}`);
+        const cb = () => {
+          cnt += 1;
+          el.html(cnt)
+          if(cnt === +$("#count").val() ) {
+            const end_time = new Date();
+            el.html(`${end_time.getTime() - start_time.getTime()} ms`)
+          }
+        }
+
+        coordinates.forEach((coord) => {
+          sendSingleRequest(coord, method, cb)
+        })
+      }
+
+      function randomFromInterval(min,max) { return Math.random()*(max-min+1)+min; }
+      // generate a bunch of random coordinates
+      function genCoords() {
+        $('#ready').removeClass('ready')
+        $('#ready').addClass('not-ready')
+        setTimeout(() => {
+          count = +$("#count").val() || COORDINATE_COUNT
+          coordinates = (new Array(count)).fill(0).map(() => {
+            const lng = randomFromInterval(-179.001953125, -66.708984375);
+            const lat = randomFromInterval(24.502144901210876, 71.42717893107371);
+            return{
+              lng: () => lng,
+              lat: () => lat
+            }
+          })
+          $('.number-of-points').html(count)
+          $('#ready').removeClass('not-ready')
+          $('#ready').addClass('ready')
+        }, 0)
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        $("#count").val(COORDINATE_COUNT)
+        $('.number-of-points').html(COORDINATE_COUNT)
+        genCoords();
+      });
+
+
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBKoWU2fu2elYMJiDXFYxY_Wg5FdviVIE&callback=initMap" async defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
