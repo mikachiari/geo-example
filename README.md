@@ -13,8 +13,10 @@ CREATE TABLE us_state (
   geo_json JSON NOT NULL
 );
 ```
-Then do (next) to fill database with data
-```mysql geo < data/geodata/data.sql```
+Then do ```mysql geo < data/geodata/data.sql``` to fill database with data
+
+After that don't forget to change url from ```http://geodata.local:3000``` to yours in client/index.html
+
 
 ```
 -- when db is filled with data
