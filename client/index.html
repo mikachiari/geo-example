@@ -189,10 +189,11 @@
       function goStress(method="json") {
         const start_time = new Date();
         let cnt = 0;
-        const el = $(`#time_stress_${method}`);
+        const el = $(`#time_stress_${method}`)
         $(`#point_${method}`).css('background-color', 'red')
         const cb = () => {
           cnt += 1;
+          el.html(cnt)
           if(cnt === +$("#count").val() ) {
             const end_time = new Date();
             el.html(`${end_time.getTime() - start_time.getTime()} ms`)

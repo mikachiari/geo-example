@@ -1,5 +1,7 @@
 Use MySQL, PostgreSQL and so on to work with geodata
 
+DB user: username without password.
+Or change in server/index.js
 
 ```
 CREATE DATABASE geo;
@@ -10,9 +12,14 @@ CREATE TABLE us_state (
   state INT,
   geo_json JSON NOT NULL
 );
+```
+Then do (next) to fill database with data
+```mysql geo < data/geodata/data.sql```
 
+```
 -- when db is filled with data
 -- add column with special type and add index to it
+USE geo;
 ALTER TABLE us_state ADD COLUMN geo_binary GEOMETRY;
 UPDATE us_state SET geo_binary=ST_GeomFromGeoJSON(geo_json);
 ALTER TABLE us_state MODIFY geo_binary GEOMETRY NOT NULL;

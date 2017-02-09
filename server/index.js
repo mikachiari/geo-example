@@ -4,7 +4,7 @@ import cors from 'cors';
 
 const app = Express();
 
-const mysqlConn = new Sequelize('mysql://danil@localhost:3306/geo', {});
+const mysqlConn = new Sequelize('mysql://username@localhost:3306/geo', {});
 
 let mysqlConnectionStatus = null;
 mysqlConn.authenticate()
